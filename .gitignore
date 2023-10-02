@@ -38,3 +38,5 @@ config.yaml
 
 /.docker/postgres/data/
 /.docker/redis/data/
+
+docker-compose.yml
