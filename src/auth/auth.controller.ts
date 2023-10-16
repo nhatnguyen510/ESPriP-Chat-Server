@@ -4,7 +4,8 @@ import { RegisterDto } from './dto';
 import { LoginGuard } from './guard/login.guard';
 import { User } from '@prisma/client';
 import { RefreshTokenGuard } from './guard/refresh-token.guard';
-import { Payload } from 'src/types/types';
+import { Payload } from 'src/types';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +24,23 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('/refresh')
-  async refreshToken(@Request() req: { user: any }) {
+  async refreshToken(
+    @Request()
+    req: {
+      user: {
+        accessToken: string;
+        refreshToken: string;
+        hashedRefreshToken: string;
+        tokenId: string;
+      };
+    },
+  ) {
     return this.authService.refresh(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  async logout(@Request() req: { user: User }) {
+    return this.authService.logout(req.user);
   }
 }

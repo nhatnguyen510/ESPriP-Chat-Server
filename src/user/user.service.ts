@@ -1,8 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/common/service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 export const roundsOfHashing = 10;
 

@@ -19,11 +19,70 @@ model User {
   last_name  String
   email     String   @unique
   is_verified Boolean @default(false)
-  refresh_token String?
   master_key String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tokens Token[]
+  friendsRequestedUser Friend[] @relation("FriendRequestedUser")
+  friendsAcceptedUser Friend[] @relation("FriendAcceptedUser")
+  conversations Conversation[] @relation("ConversationParticipants", fields: [conversationIds], references: [id])
+  conversationIds String[] @db.ObjectId
+  messages Message[] @relation("MessageSender")
+
+
+  @@map("users")
   
+}
+
+model Token {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String  @db.ObjectId
+  refreshToken String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tokens")
+}
+
+model Conversation {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  participants        User[]              @relation("ConversationParticipants", fields: [participantsIds], references: [id])
+  participantsIds     String[]            @db.ObjectId
+  encrypted_session_key String?
+  lastMessage         Message?            @relation("ConversationLastMessage", fields: [lastMessageId], references: [id])
+  lastMessageId       String   @unique  @db.ObjectId
+  lastMessageAt       DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  messages            Message[]           @relation("ConversationMessages")
+}
+
+model Message {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  conversation        Conversation        @relation("ConversationMessages", fields: [conversationId], references: [id], onUpdate: NoAction)
+  sender              User                @relation("MessageSender", fields: [senderId], references: [id])
+  conversationId      String  @db.ObjectId
+  senderId            String  @db.ObjectId
+  message             String
+  seen                Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  conversationLastMessage Conversation? @relation("ConversationLastMessage")
+  
+}
+
+model Friend {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  requestedUser           User?               @relation("FriendRequestedUser", fields: [requestedUserId], references: [id])
+  acceptedUser            User?               @relation("FriendAcceptedUser", fields: [acceptedUserId], references: [id])
+  status                  String
+  requestedUserId         String  @db.ObjectId
+  acceptedUserId          String  @db.ObjectId
+  requestedUserPublicKey  String?
+  acceptedUserPublicKey   String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
 }
 
 
