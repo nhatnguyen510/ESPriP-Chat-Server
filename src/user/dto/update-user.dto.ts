@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsString,
   IsStrongPassword,
@@ -6,11 +7,11 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class RegisterDto {
+export class UpdateUserDto {
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  username!: string;
+  username?: string;
 
   @IsString()
   @MinLength(8)
@@ -22,18 +23,27 @@ export class RegisterDto {
     minNumbers: 1,
     minSymbols: 1,
   })
-  password!: string;
+  password?: string;
 
   @IsEmail()
-  email!: string;
+  email?: string;
 
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  firstName!: string;
+  firstName?: string;
 
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  lastName!: string;
+  lastName?: string;
+
+  @IsBoolean()
+  is_verified?: boolean;
+
+  @IsString()
+  refresh_token?: string;
+
+  @IsString()
+  master_key?: string;
 }

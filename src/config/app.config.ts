@@ -4,7 +4,9 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsNotEmpty,
   IsNumber,
+  IsString,
   Max,
   Min,
   ValidateNested,
@@ -18,6 +20,24 @@ class CorsOptions {
     toClassOnly: true,
   })
   public readonly origins!: string[];
+}
+
+class JwtOptions {
+  @IsString()
+  @IsNotEmpty()
+  public readonly expiresIn!: number | string;
+
+  @IsString()
+  @IsNotEmpty()
+  public readonly secret!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public readonly refreshExpiresIn!: number | string;
+
+  @IsString()
+  @IsNotEmpty()
+  public readonly refreshSecret!: string;
 }
 
 export class AppConfig {
@@ -35,4 +55,8 @@ export class AppConfig {
   @Type(() => CorsOptions)
   @ValidateNested()
   public readonly cors!: CorsOptions;
+
+  @Type(() => JwtOptions)
+  @ValidateNested()
+  public readonly jwt!: JwtOptions;
 }
