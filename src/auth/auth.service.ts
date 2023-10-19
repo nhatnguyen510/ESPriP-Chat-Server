@@ -87,7 +87,7 @@ export class AuthService {
     });
 
     if (!foundToken) {
-      throw new NotFoundException('Token not found');
+      throw new NotFoundException('Token id is not valid');
     }
 
     const isMatch = await argon2.verify(

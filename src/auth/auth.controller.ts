@@ -1,13 +1,11 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto';
-import { LoginGuard } from './guard/login.guard';
 import { User } from '@prisma/client';
-import { RefreshTokenGuard } from './guard/refresh-token.guard';
 import { Payload } from 'src/types';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { LoginGuard, JwtAuthGuard, RefreshTokenGuard } from './guard';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

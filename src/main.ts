@@ -6,6 +6,7 @@ import {
 import { AppModule } from './app.module';
 import { AppConfig } from './config';
 import { ValidationPipe } from '@nestjs/common';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,

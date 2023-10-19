@@ -50,25 +50,27 @@ model Conversation {
   participants        User[]              @relation("ConversationParticipants", fields: [participantsIds], references: [id])
   participantsIds     String[]            @db.ObjectId
   encrypted_session_key String?
-  lastMessage         Message?            @relation("ConversationLastMessage", fields: [lastMessageId], references: [id])
-  lastMessageId       String   @unique  @db.ObjectId
+  lastMessageId       String?   
   lastMessageAt       DateTime?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   messages            Message[]           @relation("ConversationMessages")
+
+  @@map("conversations")
 }
 
 model Message {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  conversation        Conversation        @relation("ConversationMessages", fields: [conversationId], references: [id], onUpdate: NoAction)
-  sender              User                @relation("MessageSender", fields: [senderId], references: [id])
+  conversation        Conversation        @relation("ConversationMessages", fields: [conversationId], references: [id])
   conversationId      String  @db.ObjectId
+  sender              User                @relation("MessageSender", fields: [senderId], references: [id])
   senderId            String  @db.ObjectId
   message             String
   seen                Boolean             @default(false)
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
-  conversationLastMessage Conversation? @relation("ConversationLastMessage")
+
+  @@map("messages")
   
 }
 
@@ -83,6 +85,8 @@ model Friend {
   acceptedUserPublicKey   String?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
+
+  @@map("friends")
 }
 
 
