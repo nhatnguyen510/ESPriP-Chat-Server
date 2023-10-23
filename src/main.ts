@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -6,6 +6,7 @@ import {
 import { AppModule } from './app.module';
 import { AppConfig } from './config';
 import { ValidationPipe } from '@nestjs/common';
+import { JwtAuthGuard } from './auth/guard';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -29,6 +30,10 @@ async function bootstrap() {
       stopAtFirstError: false,
     }),
   );
+
+  const reflector = new Reflector();
+
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   await app.listen(config.port, '0.0.0.0');
 }

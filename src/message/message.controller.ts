@@ -12,23 +12,22 @@ import {
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CreateMessageDto, GetMessagesDto, SeenMessageDto } from './dto';
-import { JwtAuthGuard } from 'src/auth/guard';
-import { User } from '@prisma/client';
 import { MessageGuard } from './guard/message.guard';
+import { GetCurrentUser } from 'src/auth/decorator';
 
-@UseGuards(JwtAuthGuard, MessageGuard)
+@UseGuards(MessageGuard)
 @Controller()
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Post()
   create(
-    @Request() req: { user: User },
+    @GetCurrentUser('id') id: string,
     @Param('id') conversationId: string,
     @Body() message: string,
   ) {
     const createMessageDto: CreateMessageDto = {
-      sender_id: req.user.id,
+      sender_id: id,
       conversation_id: conversationId,
       message,
     };
@@ -37,13 +36,13 @@ export class MessageController {
 
   @Get()
   getMessages(
-    @Request() req: { user: User },
+    @GetCurrentUser('id') id: string,
     @Param('id') conversationId: string,
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
   ) {
     const getMessagesDto: GetMessagesDto = {
-      user_id: req.user.id,
+      user_id: id,
       conversation_id: conversationId,
       page,
       limit,
@@ -52,9 +51,9 @@ export class MessageController {
   }
 
   @Patch('/seen')
-  seen(@Request() req: { user: User }, @Param('id') conversationId: string) {
+  seen(@GetCurrentUser('id') id: string, @Param('id') conversationId: string) {
     const seenMessageDto: SeenMessageDto = {
-      user_id: req.user.id,
+      user_id: id,
       conversation_id: conversationId,
     };
     return this.messageService.seenMessage(seenMessageDto);
