@@ -2,8 +2,8 @@ import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto';
 import { User } from '@prisma/client';
-import { Payload } from 'src/types';
 import { LoginGuard, JwtAuthGuard, RefreshTokenGuard } from './guard';
+import { GetCurrentUser } from './decorator';
 
 @Controller()
 export class AuthController {
@@ -16,8 +16,8 @@ export class AuthController {
 
   @UseGuards(LoginGuard)
   @Post('/login')
-  async login(@Request() req: { user: User }) {
-    return this.authService.login(req.user);
+  async login(@GetCurrentUser() user: User) {
+    return this.authService.login(user);
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -38,7 +38,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/logout')
-  async logout(@Request() req: { user: User }) {
-    return this.authService.logout(req.user);
+  async logout(@GetCurrentUser() user: User) {
+    return this.authService.logout(user);
   }
 }

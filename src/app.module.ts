@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { MessageModule } from './message/message.module';
 import { RouterModule } from '@nestjs/core';
+import { FriendModule } from './friend/friend.module';
 import { routes } from './routes';
 
 @Module({
@@ -18,7 +19,9 @@ import { routes } from './routes';
     UserModule,
     ConversationModule,
     MessageModule,
+    FriendModule,
     RouterModule.register(routes),
+    FriendModule,
   ],
   controllers: [AppController],
   providers: [AppService],
