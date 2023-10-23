@@ -78,7 +78,7 @@ model Friend {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
   requestedUser           User?               @relation("FriendRequestedUser", fields: [requestedUserId], references: [id])
   acceptedUser            User?               @relation("FriendAcceptedUser", fields: [acceptedUserId], references: [id])
-  status                  String
+  status                  Status            
   requestedUserId         String  @db.ObjectId
   acceptedUserId          String  @db.ObjectId
   requestedUserPublicKey  String?
@@ -87,6 +87,13 @@ model Friend {
   updatedAt               DateTime            @updatedAt
 
   @@map("friends")
+  
+}
+
+enum Status {
+  Pending
+  Accepted
+  Rejected
 }
 
 

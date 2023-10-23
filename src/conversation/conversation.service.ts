@@ -1,28 +1,28 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/service';
 import { CreateConversationDto } from './dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ConversationService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private userService: UserService,
+  ) {}
 
   async createConversation(createConversationDto: CreateConversationDto) {
     // check if sender and receiver are existed in the database
-    const sender = await this.prismaService.user.findUnique({
-      where: {
-        id: createConversationDto.senderId,
-      },
-    });
+    const sender = await this.userService.findOne(
+      createConversationDto.senderId,
+    );
 
     if (!sender) {
       throw new BadRequestException('Sender not found');
     }
 
-    const receiver = await this.prismaService.user.findUnique({
-      where: {
-        id: createConversationDto.receiverId,
-      },
-    });
+    const receiver = await this.userService.findOne(
+      createConversationDto.receiverId,
+    );
 
     if (!receiver) {
       throw new BadRequestException('Receiver not found');
