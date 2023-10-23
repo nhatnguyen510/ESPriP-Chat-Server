@@ -2,18 +2,20 @@ import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto';
 import { User } from '@prisma/client';
-import { LoginGuard, JwtAuthGuard, RefreshTokenGuard } from './guard';
-import { GetCurrentUser } from './decorator';
+import { LoginGuard, RefreshTokenGuard } from './guard';
+import { GetCurrentUser, IsPublic } from './decorator';
 
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @IsPublic()
   @Post('/register')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
+  @IsPublic()
   @UseGuards(LoginGuard)
   @Post('/login')
   async login(@GetCurrentUser() user: User) {
@@ -36,7 +38,6 @@ export class AuthController {
     return this.authService.refresh(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('/logout')
   async logout(@GetCurrentUser() user: User) {
     return this.authService.logout(user);

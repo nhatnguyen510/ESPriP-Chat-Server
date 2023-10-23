@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import {
   AcceptFriendRequestDto,
@@ -13,45 +6,43 @@ import {
   SendFriendRequestDto,
   GetFriendRequestsDto,
 } from './dto';
-import { User } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/guard';
+import { GetCurrentUser } from 'src/auth/decorator';
 
-@UseGuards(JwtAuthGuard)
 @Controller()
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
   @Get()
-  getFriends(@Request() req: { user: User }) {
+  getFriends(@GetCurrentUser('id') id: string) {
     const getFriendsDto: GetFriendsDto = {
-      user_id: req.user.id,
+      user_id: id,
     };
     return this.friendService.getFriends(getFriendsDto);
   }
 
   @Get('/requests')
-  getFriendRequests(@Request() req: { user: User }) {
+  getFriendRequests(@GetCurrentUser('id') id: string) {
     const getFriendRequestsDto: GetFriendRequestsDto = {
-      user_id: req.user.id,
+      user_id: id,
     };
     return this.friendService.getFriendRequests(getFriendRequestsDto);
   }
 
   @Post('/send-request')
   sendFriendRequest(
-    @Request() req: { user: User },
+    @GetCurrentUser('id') id: string,
     @Body() sendFriendRequestDto: SendFriendRequestDto,
   ) {
-    sendFriendRequestDto.requested_user_id = req.user.id;
+    sendFriendRequestDto.requested_user_id = id;
     return this.friendService.sendFriendRequest(sendFriendRequestDto);
   }
 
   @Post('/accept-request')
   acceptFriendRequest(
-    @Request() req: { user: User },
+    @GetCurrentUser('id') id: string,
     @Body() acceptFriendRequestDto: AcceptFriendRequestDto,
   ) {
-    acceptFriendRequestDto.accepted_user_id = req.user.id;
+    acceptFriendRequestDto.accepted_user_id = id;
     return this.friendService.acceptFriendRequest(acceptFriendRequestDto);
   }
 }

@@ -3,8 +3,6 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
-import { JwtAuthGuard } from 'src/auth/guard';
-import { PrismaService } from 'src/common/service';
 
 @Injectable()
 export class MessageGuard implements CanActivate {

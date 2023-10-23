@@ -5,17 +5,14 @@ import {
   Param,
   Post,
   UseGuards,
-  Request,
   UsePipes,
 } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto';
-import { JwtAuthGuard } from 'src/auth/guard';
-import { User } from '@prisma/client';
 import { MongoIdValidationPipe } from 'src/utils/pipes';
 import { MessageGuard } from 'src/message/guard/message.guard';
+import { GetCurrentUser } from 'src/auth/decorator';
 
-@UseGuards(JwtAuthGuard)
 @Controller()
 export class ConversationController {
   constructor(private conversationService: ConversationService) {}
@@ -28,8 +25,8 @@ export class ConversationController {
   }
 
   @Get()
-  async getAllConversationByUserId(@Request() req: { user: User }) {
-    return this.conversationService.getAllConversationByUserId(req.user.id);
+  async getAllConversationByUserId(@GetCurrentUser('id') id: string) {
+    return this.conversationService.getAllConversationByUserId(id);
   }
 
   @Get(':id')
