@@ -4,10 +4,10 @@ export class CreateConversationDto {
   @IsString()
   @IsNotEmpty()
   @IsMongoId()
-  senderId: string;
+  sender_id: string;
 
   @IsString()
   @IsNotEmpty()
   @IsMongoId()
-  receiverId: string;
+  receiver_id: string;
 }

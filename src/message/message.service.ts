@@ -7,41 +7,49 @@ export class MessageService {
   constructor(private prismaService: PrismaService) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
+    const { conversation_id, sender_id, message } = createMessageDto;
     const createdMessage = await this.prismaService.message.create({
       data: {
         conversation: {
           connect: {
-            id: createMessageDto.conversation_id,
+            id: conversation_id,
           },
         },
         sender: {
           connect: {
-            id: createMessageDto.sender_id,
+            id: sender_id,
           },
         },
-        message: createMessageDto.message,
+        message,
       },
     });
 
     // update conversation last message
     const updatedConversation = await this.prismaService.conversation.update({
       where: {
-        id: createdMessage.conversationId,
+        id: createdMessage.conversation_id,
       },
       data: {
-        lastMessageId: createdMessage.id,
-        lastMessageAt: createdMessage.createdAt,
+        last_message_id: createdMessage.id,
+        last_message_at: createdMessage.created_at,
       },
     });
 
-    return { savedMessage: createdMessage, updatedConversation };
+    return {
+      savedMessage: createdMessage,
+      updatedConversation: {
+        ...updatedConversation,
+        last_message: createdMessage,
+      },
+    };
   }
 
   async seenMessage(seenMessageDto: SeenMessageDto) {
+    const { conversation_id } = seenMessageDto;
     return await this.prismaService.message.updateMany({
       where: {
-        conversationId: seenMessageDto.conversation_id,
-        senderId: {
+        conversation_id,
+        sender_id: {
           not: seenMessageDto.user_id,
         },
       },
@@ -52,9 +60,10 @@ export class MessageService {
   }
 
   async getMessages(getMessagesDto: GetMessagesDto) {
+    const { conversation_id, limit, page } = getMessagesDto;
     return await this.prismaService.message.findMany({
       where: {
-        conversationId: getMessagesDto.conversation_id,
+        conversation_id,
       },
       include: {
         sender: {
@@ -64,11 +73,8 @@ export class MessageService {
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: getMessagesDto.limit as number,
-      skip: (getMessagesDto.page - 1) * getMessagesDto.limit,
+      take: limit as number,
+      skip: (page - 1) * limit,
     });
   }
 }

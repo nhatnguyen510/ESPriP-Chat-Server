@@ -1,5 +1,5 @@
 import { UserService } from './../user/user.service';
-import { LoginDto, RegisterDto } from './dto';
+import { RegisterDto } from './dto';
 import {
   BadRequestException,
   ForbiddenException,
@@ -31,11 +31,12 @@ export class AuthService {
   }
 
   async login(user: User) {
+    const { id, username } = user;
     // generate access token
-    const accessToken = this.generateAccessToken(user.username, user.id);
+    const accessToken = this.generateAccessToken(username, id);
 
     // generate refresh token
-    const refreshToken = this.generateRefreshToken(user.username, user.id);
+    const refreshToken = this.generateRefreshToken(username, id);
 
     // hash refresh token
     const hashedRefreshToken = await argon2.hash(refreshToken);
@@ -43,10 +44,10 @@ export class AuthService {
     //save refresh token in db
     const token = await this.prismaService.token.create({
       data: {
-        refreshToken: hashedRefreshToken,
+        refresh_token: hashedRefreshToken,
         user: {
           connect: {
-            id: user.id,
+            id,
           },
         },
       },
@@ -56,9 +57,9 @@ export class AuthService {
     const { password, ...rest } = user;
 
     return {
-      accessToken,
-      refreshToken,
-      refreshTokenId: token.id,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      refresh_token_id: token.id,
       ...rest,
     };
   }
@@ -66,7 +67,7 @@ export class AuthService {
   async logout(user: User) {
     await this.prismaService.token.deleteMany({
       where: {
-        userId: user.id,
+        user_id: user.id,
       },
     });
 
@@ -90,10 +91,7 @@ export class AuthService {
       throw new NotFoundException('Token id is not valid');
     }
 
-    const isMatch = await argon2.verify(
-      foundToken.refreshToken ?? '',
-      refreshToken,
-    );
+    const isMatch = await argon2.verify(foundToken.refresh_token, refreshToken);
 
     const issuedAt = dayjs.unix(payload.iat);
     const diff = dayjs().diff(issuedAt, 'seconds');
@@ -109,12 +107,12 @@ export class AuthService {
 
       //refresh token is valid but not in db
       //possible re-use!!! delete all refresh tokens(sessions) belonging to the sub
-      if (payload.id !== foundToken.userId) {
+      if (payload.id !== foundToken.user_id) {
         //the sub of the token isn't the id of the token in db
         // log out all session of this payalod id, reFreshToken has been compromised
         await this.prismaService.token.deleteMany({
           where: {
-            userId: payload.id,
+            user_id: payload.id,
           },
         });
         throw new ForbiddenException('Refresh token has been compromised');
@@ -124,38 +122,46 @@ export class AuthService {
     }
   }
 
-  async refresh({ accessToken, refreshToken, hashedRefreshToken, tokenId }) {
+  async refresh({
+    access_token,
+    refresh_token,
+    hashed_refresh_token,
+    token_id,
+  }) {
     await this.prismaService.token.update({
       where: {
-        id: tokenId,
+        id: token_id,
       },
       data: {
-        refreshToken: hashedRefreshToken,
+        refresh_token: hashed_refresh_token,
       },
     });
 
     return {
-      accessToken,
-      refreshToken,
+      access_token,
+      refresh_token,
     };
   }
 
   private async generateTokens(payload: Payload, tokenId: string) {
     const accessToken = this.generateAccessToken(payload.username, payload.id);
 
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    const remainingTime = payload.exp - currentTime;
+
     const newRefreshToken = this.generateRefreshToken(
       payload.username,
       payload.id,
-      payload.exp,
+      remainingTime,
     );
 
     const hash = await argon2.hash(newRefreshToken);
 
     return {
-      accessToken,
-      refreshToken: newRefreshToken,
-      hashedRefreshToken: hash,
-      tokenId: tokenId,
+      access_token: accessToken,
+      refresh_token: newRefreshToken,
+      hashed_refresh_token: hash,
+      token_id: tokenId,
     };
   }
 

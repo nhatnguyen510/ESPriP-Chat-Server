@@ -11,18 +11,15 @@ export class ConversationService {
   ) {}
 
   async createConversation(createConversationDto: CreateConversationDto) {
+    const { sender_id, receiver_id } = createConversationDto;
     // check if sender and receiver are existed in the database
-    const sender = await this.userService.findOne(
-      createConversationDto.senderId,
-    );
+    const sender = await this.userService.findOne(sender_id);
 
     if (!sender) {
       throw new BadRequestException('Sender not found');
     }
 
-    const receiver = await this.userService.findOne(
-      createConversationDto.receiverId,
-    );
+    const receiver = await this.userService.findOne(receiver_id);
 
     if (!receiver) {
       throw new BadRequestException('Receiver not found');
@@ -34,10 +31,7 @@ export class ConversationService {
         participants: {
           every: {
             id: {
-              in: [
-                createConversationDto.senderId,
-                createConversationDto.receiverId,
-              ],
+              in: [sender_id, receiver_id],
             },
           },
         },
@@ -51,31 +45,67 @@ export class ConversationService {
     return this.prismaService.conversation.create({
       data: {
         participants: {
-          connect: [
-            { id: createConversationDto.senderId },
-            { id: createConversationDto.receiverId },
-          ],
+          connect: [{ id: sender_id }, { id: receiver_id }],
         },
       },
     });
   }
 
   async getConversationById(id: string) {
-    return this.prismaService.conversation.findUnique({
+    const conversation = await this.prismaService.conversation.findUnique({
       where: {
         id,
       },
     });
+
+    if (!conversation) {
+      throw new BadRequestException('Conversation not found');
+    }
+
+    const lastMessage = await this.getLastMessageByConversationId(id);
+
+    return {
+      ...conversation,
+      last_message: lastMessage,
+    };
   }
 
   async getAllConversationByUserId(userId: string) {
-    return this.prismaService.conversation.findMany({
+    const conversations = await this.prismaService.conversation.findMany({
       where: {
         participants: {
           some: {
             id: userId,
           },
         },
+      },
+    });
+
+    if (!conversations) {
+      throw new BadRequestException('Conversations not found');
+    }
+
+    const promises = conversations.map(async (conversation) => {
+      const lastMessage = await this.getLastMessageByConversationId(
+        conversation.id,
+      );
+
+      return {
+        ...conversation,
+        last_message: lastMessage,
+      };
+    });
+
+    return Promise.all(promises);
+  }
+
+  async getLastMessageByConversationId(conversation_id: string) {
+    return await this.prismaService.message.findFirst({
+      where: {
+        conversation_id,
+      },
+      orderBy: {
+        created_at: 'desc',
       },
     });
   }

@@ -21,7 +21,6 @@ import { routes } from './routes';
     MessageModule,
     FriendModule,
     RouterModule.register(routes),
-    FriendModule,
   ],
   controllers: [AppController],
   providers: [AppService],
