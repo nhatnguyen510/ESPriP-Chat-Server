@@ -10,14 +10,15 @@ export class UserService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    const { username, email, password, first_name, last_name } = createUserDto;
     const isUserExist = await this.prismaService.user.findFirst({
       where: {
         OR: [
           {
-            username: createUserDto.username,
+            username,
           },
           {
-            email: createUserDto.email,
+            email,
           },
         ],
       },
@@ -27,20 +28,15 @@ export class UserService {
       throw new BadRequestException('User already exist');
     }
 
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      roundsOfHashing,
-    );
-
-    createUserDto.password = hashedPassword;
+    const hashedPassword = await bcrypt.hash(password, roundsOfHashing);
 
     return this.prismaService.user.create({
       data: {
-        username: createUserDto.username,
-        password: createUserDto.password,
-        email: createUserDto.email,
-        first_name: createUserDto.firstName,
-        last_name: createUserDto.lastName,
+        username,
+        password: hashedPassword,
+        email,
+        first_name,
+        last_name,
       },
     });
   }

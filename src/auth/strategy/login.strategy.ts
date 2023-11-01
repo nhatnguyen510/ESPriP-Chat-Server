@@ -14,7 +14,9 @@ export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
     const user = await this.userService.findByUsername(username);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException({
+        message: 'User not found',
+      });
     }
 
     const isPasswordValid = await this.userService.validatePassword(
@@ -23,7 +25,9 @@ export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
     );
 
     if (!isPasswordValid) {
-      throw new NotFoundException('Invalid password');
+      throw new NotFoundException({
+        message: 'Password is not valid',
+      });
     }
     return user;
   }

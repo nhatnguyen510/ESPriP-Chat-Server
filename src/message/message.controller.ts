@@ -3,10 +3,8 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   UseGuards,
-  Request,
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -24,7 +22,7 @@ export class MessageController {
   create(
     @GetCurrentUser('id') id: string,
     @Param('id') conversationId: string,
-    @Body() message: string,
+    @Body('message') message: string,
   ) {
     const createMessageDto: CreateMessageDto = {
       sender_id: id,
@@ -36,25 +34,28 @@ export class MessageController {
 
   @Get()
   getMessages(
-    @GetCurrentUser('id') id: string,
-    @Param('id') conversationId: string,
+    @GetCurrentUser('id') user_id: string,
+    @Param('id') conversation_id: string,
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
   ) {
     const getMessagesDto: GetMessagesDto = {
-      user_id: id,
-      conversation_id: conversationId,
+      user_id,
+      conversation_id,
       page,
       limit,
     };
     return this.messageService.getMessages(getMessagesDto);
   }
 
-  @Patch('/seen')
-  seen(@GetCurrentUser('id') id: string, @Param('id') conversationId: string) {
+  @Post('/seen')
+  seen(
+    @GetCurrentUser('id') user_id: string,
+    @Param('id') conversation_id: string,
+  ) {
     const seenMessageDto: SeenMessageDto = {
-      user_id: id,
-      conversation_id: conversationId,
+      user_id,
+      conversation_id,
     };
     return this.messageService.seenMessage(seenMessageDto);
   }

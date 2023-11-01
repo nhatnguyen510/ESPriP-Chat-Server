@@ -18,11 +18,11 @@ export class FriendService {
     const { user_id } = getFriendRequestDto;
     return this.prismaService.friend.findMany({
       where: {
-        acceptedUserId: user_id,
+        accepted_user_id: user_id,
         status: 'Pending',
       },
-      select: {
-        requestedUser: {
+      include: {
+        requested_user: {
           select: {
             id: true,
             username: true,
@@ -30,7 +30,7 @@ export class FriendService {
             last_name: true,
           },
         },
-        acceptedUser: {
+        accepted_user: {
           select: {
             id: true,
             username: true,
@@ -58,8 +58,8 @@ export class FriendService {
       );
     }
 
-    const requestedUser = this.userService.findOne(requested_user_id);
-    const acceptedUser = this.userService.findOne(accepted_user_id);
+    const requestedUser = await this.userService.findOne(requested_user_id);
+    const acceptedUser = await this.userService.findOne(accepted_user_id);
 
     if (!requestedUser) {
       throw new BadRequestException('The requested user does not exist');
@@ -73,18 +73,18 @@ export class FriendService {
       where: {
         OR: [
           {
-            requestedUser: {
+            requested_user: {
               id: requested_user_id,
             },
-            acceptedUser: {
+            accepted_user: {
               id: accepted_user_id,
             },
           },
           {
-            requestedUser: {
+            requested_user: {
               id: accepted_user_id,
             },
-            acceptedUser: {
+            accepted_user: {
               id: requested_user_id,
             },
           },
@@ -102,17 +102,17 @@ export class FriendService {
 
     return this.prismaService.friend.create({
       data: {
-        requestedUser: {
+        requested_user: {
           connect: {
             id: requested_user_id,
           },
         },
-        acceptedUser: {
+        accepted_user: {
           connect: {
             id: accepted_user_id,
           },
         },
-        requestedUserPublicKey: requested_user_public_key,
+        requested_user_public_key,
         status: 'Pending',
       },
     });
@@ -128,8 +128,8 @@ export class FriendService {
       );
     }
 
-    const requestedUser = this.userService.findOne(requested_user_id);
-    const acceptedUser = this.userService.findOne(accepted_user_id);
+    const requestedUser = await this.userService.findOne(requested_user_id);
+    const acceptedUser = await this.userService.findOne(accepted_user_id);
 
     if (!requestedUser) {
       throw new BadRequestException('The requested user does not exist');
@@ -143,20 +143,12 @@ export class FriendService {
       where: {
         OR: [
           {
-            requestedUser: {
-              id: requested_user_id,
-            },
-            acceptedUser: {
-              id: accepted_user_id,
-            },
+            requested_user_id,
+            accepted_user_id,
           },
           {
-            requestedUser: {
-              id: accepted_user_id,
-            },
-            acceptedUser: {
-              id: requested_user_id,
-            },
+            requested_user_id: accepted_user_id,
+            accepted_user_id: requested_user_id,
           },
         ],
       },
@@ -167,7 +159,7 @@ export class FriendService {
     }
 
     if (
-      existedFriendRequest.requestedUserId == accepted_user_id &&
+      existedFriendRequest.requested_user_id == accepted_user_id &&
       existedFriendRequest.status === 'Pending'
     ) {
       throw new BadRequestException(
@@ -182,7 +174,7 @@ export class FriendService {
       },
       data: {
         status: 'Accepted',
-        acceptedUserPublicKey: accepted_user_public_key,
+        accepted_user_public_key,
       },
     });
 
@@ -192,10 +184,10 @@ export class FriendService {
         participants: {
           connect: [
             {
-              id: updatedFriendRequest.requestedUserId,
+              id: updatedFriendRequest.requested_user_id,
             },
             {
-              id: updatedFriendRequest.acceptedUserId,
+              id: updatedFriendRequest.accepted_user_id,
             },
           ],
         },
@@ -205,39 +197,60 @@ export class FriendService {
     return updatedFriendRequest;
   }
 
-  getFriends(getFriendsDto: GetFriendsDto) {
+  async getFriends(getFriendsDto: GetFriendsDto) {
     const { user_id } = getFriendsDto;
-    return this.prismaService.friend.findMany({
-      where: {
-        OR: [
-          {
-            requestedUserId: user_id,
-            status: 'Accepted',
+    return this.prismaService.friend
+      .findMany({
+        where: {
+          OR: [
+            {
+              requested_user_id: user_id,
+              status: 'Accepted',
+            },
+            {
+              accepted_user_id: user_id,
+              status: 'Accepted',
+            },
+          ],
+        },
+        include: {
+          requested_user: {
+            where: {
+              id: {
+                not: user_id,
+              },
+            },
+            select: {
+              id: true,
+              username: true,
+              first_name: true,
+              last_name: true,
+            },
           },
-          {
-            acceptedUserId: user_id,
-            status: 'Accepted',
-          },
-        ],
-      },
-      select: {
-        requestedUser: {
-          select: {
-            id: true,
-            username: true,
-            first_name: true,
-            last_name: true,
+          accepted_user: {
+            where: {
+              id: {
+                not: user_id,
+              },
+            },
+            select: {
+              id: true,
+              username: true,
+              first_name: true,
+              last_name: true,
+            },
           },
         },
-        acceptedUser: {
-          select: {
-            id: true,
-            username: true,
-            first_name: true,
-            last_name: true,
-          },
-        },
-      },
-    });
+      })
+      .then((friends) => {
+        return friends.map((friend) => {
+          if (!friend.accepted_user) {
+            return friend.requested_user;
+          }
+          if (!friend.requested_user) {
+            return friend.accepted_user;
+          }
+        });
+      });
   }
 }

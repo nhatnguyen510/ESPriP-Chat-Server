@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
 }
 
@@ -12,82 +12,78 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  username  String   @unique
-  password  String
-  first_name String
-  last_name  String
-  email     String   @unique
-  is_verified Boolean @default(false)
-  master_key String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tokens Token[]
-  friendsRequestedUser Friend[] @relation("FriendRequestedUser")
-  friendsAcceptedUser Friend[] @relation("FriendAcceptedUser")
-  conversations Conversation[] @relation("ConversationParticipants", fields: [conversationIds], references: [id])
-  conversationIds String[] @db.ObjectId
-  messages Message[] @relation("MessageSender")
-
+  id                     String         @id @default(auto()) @map("_id") @db.ObjectId
+  username               String         @unique
+  password               String
+  first_name             String
+  last_name              String
+  email                  String         @unique
+  is_verified            Boolean        @default(false)
+  master_key             String?
+  created_at             DateTime       @default(now())
+  updated_at             DateTime       @updatedAt
+  tokens                 Token[]
+  friends_requested_user Friend[]       @relation("FriendRequestedUser")
+  friends_accepted_user  Friend[]       @relation("FriendAcceptedUser")
+  conversations          Conversation[] @relation("ConversationParticipants", fields: [conversation_ids], references: [id])
+  conversation_ids       String[]       @db.ObjectId
+  messages               Message[]      @relation("MessageSender")
 
   @@map("users")
-  
 }
 
 model Token {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String  @db.ObjectId
-  refreshToken String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id       String   @db.ObjectId
+  refresh_token String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("tokens")
 }
 
 model Conversation {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  participants        User[]              @relation("ConversationParticipants", fields: [participantsIds], references: [id])
-  participantsIds     String[]            @db.ObjectId
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  participants          User[]    @relation("ConversationParticipants", fields: [participants_ids], references: [id])
+  participants_ids      String[]  @db.ObjectId
   encrypted_session_key String?
-  lastMessageId       String?   
-  lastMessageAt       DateTime?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  messages            Message[]           @relation("ConversationMessages")
+  last_message_id       String?   @db.ObjectId
+  last_message_at       DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  messages              Message[] @relation("ConversationMessages")
 
   @@map("conversations")
 }
 
 model Message {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  conversation        Conversation        @relation("ConversationMessages", fields: [conversationId], references: [id])
-  conversationId      String  @db.ObjectId
-  sender              User                @relation("MessageSender", fields: [senderId], references: [id])
-  senderId            String  @db.ObjectId
-  message             String
-  seen                Boolean             @default(false)
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  conversation    Conversation @relation("ConversationMessages", fields: [conversation_id], references: [id], onDelete: Cascade)
+  conversation_id String       @db.ObjectId
+  sender          User         @relation("MessageSender", fields: [sender_id], references: [id])
+  sender_id       String       @db.ObjectId
+  message         String
+  seen            Boolean      @default(false)
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
 
   @@map("messages")
-  
 }
 
 model Friend {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  requestedUser           User?               @relation("FriendRequestedUser", fields: [requestedUserId], references: [id])
-  acceptedUser            User?               @relation("FriendAcceptedUser", fields: [acceptedUserId], references: [id])
-  status                  Status            
-  requestedUserId         String  @db.ObjectId
-  acceptedUserId          String  @db.ObjectId
-  requestedUserPublicKey  String?
-  acceptedUserPublicKey   String?
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
+  id                        String   @id @default(auto()) @map("_id") @db.ObjectId
+  requested_user            User?    @relation("FriendRequestedUser", fields: [requested_user_id], references: [id])
+  accepted_user             User?    @relation("FriendAcceptedUser", fields: [accepted_user_id], references: [id])
+  status                    Status
+  requested_user_id         String   @db.ObjectId
+  accepted_user_id          String   @db.ObjectId
+  requested_user_public_key String?
+  accepted_user_public_key  String?
+  created_at                DateTime @default(now())
+  updated_at                DateTime @updatedAt
 
   @@map("friends")
-  
 }
 
 enum Status {
@@ -95,7 +91,3 @@ enum Status {
   Accepted
   Rejected
 }
-
-
-
-

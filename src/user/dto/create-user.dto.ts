@@ -30,10 +30,10 @@ export class CreateUserDto {
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  firstName!: string;
+  first_name!: string;
 
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  lastName!: string;
+  last_name!: string;
 }

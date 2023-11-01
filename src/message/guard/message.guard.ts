@@ -18,7 +18,7 @@ export class MessageGuard implements CanActivate {
 
     // check if user is in the conversation
     const isUserInTheConversation =
-      user.conversationIds.includes(conversationId);
+      user.conversation_ids.includes(conversationId);
 
     if (!isUserInTheConversation) {
       return false;

@@ -22,16 +22,17 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @IsPublic()
   @UseGuards(RefreshTokenGuard)
   @Post('/refresh')
   async refreshToken(
     @Request()
     req: {
       user: {
-        accessToken: string;
-        refreshToken: string;
-        hashedRefreshToken: string;
-        tokenId: string;
+        access_token: string;
+        refresh_token: string;
+        hashed_refresh_token: string;
+        token_id: string;
       };
     },
   ) {

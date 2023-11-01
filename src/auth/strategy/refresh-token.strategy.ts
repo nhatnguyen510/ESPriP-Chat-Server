@@ -19,7 +19,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
     private authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
+      jwtFromRequest: ExtractJwt.fromBodyField('refresh_token'),
       secretOrKey: appConfig.jwt.refreshSecret,
       passReqToCallback: true,
     });
@@ -27,7 +27,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
 
   async validate(request: Request, payload: Payload) {
     const user = await this.userService.findOne(payload.id);
-    const refreshToken = request.body.refreshToken;
+    const refreshToken = request.body.refresh_token;
     const tokenId = request.headers['x-token-id'] as string;
 
     if (!user) {
