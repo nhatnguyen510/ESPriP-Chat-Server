@@ -1,46 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMessageDto, GetMessagesDto, SeenMessageDto } from './dto';
 import { PrismaService } from 'src/common/service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class MessageService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    @InjectQueue('message:send')
+    private readonly send_message_queue: Queue,
+  ) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
     const { conversation_id, sender_id, message } = createMessageDto;
-    const createdMessage = await this.prismaService.message.create({
-      data: {
-        conversation: {
-          connect: {
-            id: conversation_id,
-          },
-        },
-        sender: {
-          connect: {
-            id: sender_id,
-          },
-        },
-        message,
-      },
-    });
 
-    // update conversation last message
-    const updatedConversation = await this.prismaService.conversation.update({
-      where: {
-        id: createdMessage.conversation_id,
-      },
-      data: {
-        last_message_id: createdMessage.id,
-        last_message_at: createdMessage.created_at,
-      },
+    const job = await this.send_message_queue.add('send-message', {
+      conversation_id,
+      sender_id,
+      message,
     });
 
     return {
-      savedMessage: createdMessage,
-      updatedConversation: {
-        ...updatedConversation,
-        last_message: createdMessage,
-      },
+      message: 'Message sent',
+      job_id: job.id,
     };
   }
 
@@ -61,20 +44,25 @@ export class MessageService {
 
   async getMessages(getMessagesDto: GetMessagesDto) {
     const { conversation_id, limit, page } = getMessagesDto;
-    return await this.prismaService.message.findMany({
-      where: {
-        conversation_id,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
+    return await this.prismaService.message
+      .findMany({
+        where: {
+          conversation_id,
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+            },
           },
         },
-      },
-      take: limit as number,
-      skip: (page - 1) * limit,
-    });
+        orderBy: {
+          created_at: 'desc',
+        },
+        skip: (page - 1) * limit,
+        take: limit as number,
+      })
+      .then((messages) => messages.reverse());
   }
 }
