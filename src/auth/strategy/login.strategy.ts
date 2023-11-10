@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { User } from '@prisma/client';
 import { Strategy } from 'passport-local';
@@ -14,9 +14,7 @@ export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
     const user = await this.userService.findByUsername(username);
 
     if (!user) {
-      throw new NotFoundException({
-        message: 'User not found',
-      });
+      throw new BadRequestException('User not found');
     }
 
     const isPasswordValid = await this.userService.validatePassword(
@@ -25,9 +23,7 @@ export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
     );
 
     if (!isPasswordValid) {
-      throw new NotFoundException({
-        message: 'Password is not valid',
-      });
+      throw new BadRequestException('Password is not valid');
     }
     return user;
   }
