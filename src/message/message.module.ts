@@ -6,6 +6,7 @@ import { ConversationModule } from 'src/conversation/conversation.module';
 import { MessageGuard } from './guard/message.guard';
 import { BullModule } from '@nestjs/bullmq';
 import { MessageSendProcessor } from './queues/message.processor';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MessageSendProcessor } from './queues/message.processor';
       name: 'message:send',
       prefix: 'chat',
     }),
+    ChatModule,
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageGuard, MessageSendProcessor],

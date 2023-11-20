@@ -1,7 +1,11 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
+import { EmitEvent } from 'src/chat/chat.enum';
+import { ChatGateway } from 'src/chat/chat.gateway';
+import { ChatService } from 'src/chat/chat.service';
 import { PrismaService } from 'src/common/service';
+import { RedisNameSpace } from 'src/enum';
 
 @Processor('message:send', {
   concurrency: 2,
@@ -9,7 +13,11 @@ import { PrismaService } from 'src/common/service';
 export class MessageSendProcessor extends WorkerHost {
   private logger = new Logger();
 
-  constructor(private prismaService: PrismaService) {
+  constructor(
+    private prismaService: PrismaService,
+    private chatGateway: ChatGateway,
+    private chatService: ChatService,
+  ) {
     super();
   }
 
@@ -44,8 +52,6 @@ export class MessageSendProcessor extends WorkerHost {
       },
     });
 
-    await this.delay(job);
-
     return {
       savedMessage: createdMessage,
       updatedConversation: {
@@ -66,9 +72,15 @@ export class MessageSendProcessor extends WorkerHost {
   }
 
   @OnWorkerEvent('completed')
-  onQueueComplete(job: Job, result: any) {
+  async onQueueComplete(job: Job, result: any) {
     this.logger.log(`Job has been finished: ${job.id}`);
-    this.logger.log({ result });
+    const userSocketId = await this.chatService.getSocketIdFromRedis(
+      RedisNameSpace.Online,
+      result.savedMessage.sender_id,
+    );
+    this.chatGateway.server
+      .to(userSocketId)
+      .emit(EmitEvent.MessageSent, result);
   }
 
   @OnWorkerEvent('failed')
