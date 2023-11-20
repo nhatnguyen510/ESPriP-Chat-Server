@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -197,5 +198,23 @@ export class AuthService {
         expiresIn,
       },
     );
+  }
+
+  async verifyToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: appConfig.jwt.secret,
+      });
+
+      const user = await this.userService.findOne(payload.id);
+
+      if (!user) {
+        return null;
+      }
+
+      return user;
+    } catch (err) {
+      return null;
+    }
   }
 }

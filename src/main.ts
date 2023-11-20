@@ -7,6 +7,8 @@ import { AppModule } from './app.module';
 import { AppConfig } from './config';
 import { ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guard';
+import { RedisService } from './common/service';
+import { ChatAdapter } from './chat/chat.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -34,6 +36,13 @@ async function bootstrap() {
   const reflector = new Reflector();
 
   app.useGlobalGuards(new JwtAuthGuard(reflector));
+
+  const redisService = app.get(RedisService);
+
+  const redisIoAdapter = new ChatAdapter(redisService.client, app);
+  await redisIoAdapter.connectToRedis();
+
+  app.useWebSocketAdapter(redisIoAdapter);
 
   await app.listen(config.port, '0.0.0.0');
 }

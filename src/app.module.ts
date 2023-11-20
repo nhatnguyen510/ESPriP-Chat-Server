@@ -12,6 +12,7 @@ import { FriendModule } from './friend/friend.module';
 import { routes } from './routes';
 import { BullModule } from '@nestjs/bullmq';
 import { RedisConfig } from './config';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RedisConfig } from './config';
     ConversationModule,
     MessageModule,
     FriendModule,
+    ChatModule,
     RouterModule.register(routes),
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -30,6 +32,7 @@ import { RedisConfig } from './config';
         connection: {
           host: redisConfig.host,
           port: redisConfig.port,
+          password: redisConfig.password,
         },
       }),
     }),
