@@ -33,6 +33,7 @@ export class ChatService {
     const onlineFriendsIds = this.getOnlineFriendsIds(onlineFriends);
 
     console.log('onlineFriends: ', onlineFriends);
+    console.log('onlineFriendsIds: ', onlineFriendsIds);
     console.log('friendSocketIds: ', friendSocketIds);
 
     server.to(socketId).emit(EmitEvent.OnlineFriends, onlineFriendsIds);
@@ -60,10 +61,23 @@ export class ChatService {
     });
   }
 
-  async returnMessageToSender(server: Server, client: CustomSocket) {
+  async markMessageAsSeen(server: Server, client: CustomSocket, data: any) {
     const userId: UserId = client.user.id;
 
-    const socketId: SocketId = client.id;
+    const { conversation_id, receiver_id, seen } = data;
+
+    const receiverSocketId = await this.getSocketIdFromRedis(
+      RedisNameSpace.Online,
+      receiver_id,
+    );
+
+    if (receiverSocketId) {
+      server.to(receiverSocketId).emit(EmitEvent.MessageSeen, {
+        conversation_id,
+        sender_id: userId,
+        seen,
+      });
+    }
   }
 
   private async setSocketIdToRedis(

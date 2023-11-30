@@ -43,4 +43,16 @@ export class AuthController {
   async logout(@GetCurrentUser() user: User) {
     return this.authService.logout(user);
   }
+
+  @IsPublic()
+  @Post('/verify/username')
+  async verifyUsername(@Body('username') username: string) {
+    return this.authService.verifyUsername(username);
+  }
+
+  @IsPublic()
+  @Post('/verify/email')
+  async verifyEmail(@Body('email') email: string) {
+    return this.authService.verifyEmail(email);
+  }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -7,9 +8,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { CustomSocket } from './chat.type';
 import { ChatService } from './chat.service';
+import { ListenEvent } from './chat.enum';
 
 @Injectable()
 @WebSocketGateway({
@@ -34,10 +36,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await this.chatService.disconnect(this.server, client);
   }
 
-  @SubscribeMessage('events')
-  sendData(@MessageBody() message: any) {
-    console.log('message in gateway: ', message);
-    this.server.emit('EmitData', message);
+  @SubscribeMessage(ListenEvent.MarkMessageAsSeen)
+  async messageSeen(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: CustomSocket,
+  ): Promise<void> {
+    await this.chatService.markMessageAsSeen(this.server, client, data);
   }
 
   @SubscribeMessage('identity')

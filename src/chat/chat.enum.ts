@@ -1,6 +1,7 @@
 export enum ListenEvent {
   Connect = 'connect',
   PrivateMessage = 'private_message',
+  MarkMessageAsSeen = 'mark_message_as_seen',
 }
 
 export enum EmitEvent {
@@ -10,7 +11,8 @@ export enum EmitEvent {
   UserOffline = 'user_offline',
   OnlineFriends = 'online_friends',
   MessageSent = 'message_sent',
-  PrivateMessage = 'private_message',
+  ReceiveMessage = 'receive_message',
+  MessageSeen = 'message_seen',
 }
 
 export enum Status {

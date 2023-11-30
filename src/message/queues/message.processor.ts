@@ -6,6 +6,7 @@ import { ChatGateway } from 'src/chat/chat.gateway';
 import { ChatService } from 'src/chat/chat.service';
 import { PrismaService } from 'src/common/service';
 import { RedisNameSpace } from 'src/enum';
+import { Message, Conversation } from '@prisma/client';
 
 @Processor('message:send', {
   concurrency: 2,
@@ -53,10 +54,11 @@ export class MessageSendProcessor extends WorkerHost {
     });
 
     return {
-      savedMessage: createdMessage,
+      message: createdMessage,
       updatedConversation: {
         ...updatedConversation,
         last_message: createdMessage,
+        last_message_at: createdMessage.created_at,
       },
     };
   }
@@ -72,15 +74,48 @@ export class MessageSendProcessor extends WorkerHost {
   }
 
   @OnWorkerEvent('completed')
-  async onQueueComplete(job: Job, result: any) {
+  async onQueueComplete(
+    job: Job,
+    result: {
+      message: Message;
+      updatedConversation: Conversation & {
+        last_message: Message;
+        last_message_at: string;
+      };
+    },
+  ) {
     this.logger.log(`Job has been finished: ${job.id}`);
     const userSocketId = await this.chatService.getSocketIdFromRedis(
       RedisNameSpace.Online,
-      result.savedMessage.sender_id,
+      result.message.sender_id,
     );
-    this.chatGateway.server
-      .to(userSocketId)
-      .emit(EmitEvent.MessageSent, result);
+
+    console.log('userSocketId: ', userSocketId);
+
+    const receiverId = result.updatedConversation.participants_ids.find(
+      (id) => id !== result.message.sender_id,
+    );
+
+    console.log('receiverId: ', receiverId);
+
+    const receiverSocketId = await this.chatService.getSocketIdFromRedis(
+      RedisNameSpace.Online,
+      receiverId,
+    );
+
+    console.log('receiverSocketId: ', receiverSocketId);
+
+    if (userSocketId) {
+      this.chatGateway.server
+        .to(userSocketId)
+        .emit(EmitEvent.MessageSent, result);
+    }
+
+    if (receiverSocketId) {
+      this.chatGateway.server
+        .to(receiverSocketId)
+        .emit(EmitEvent.ReceiveMessage, result);
+    }
   }
 
   @OnWorkerEvent('failed')
