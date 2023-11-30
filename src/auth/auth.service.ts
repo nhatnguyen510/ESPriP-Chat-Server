@@ -206,6 +206,8 @@ export class AuthService {
         secret: appConfig.jwt.secret,
       });
 
+      console.log('payload in chat adapter: ', payload);
+
       const user = await this.userService.findOne(payload.id);
 
       if (!user) {
@@ -214,7 +216,32 @@ export class AuthService {
 
       return user;
     } catch (err) {
+      console.log('error in chat adapter: ', err);
       return null;
     }
+  }
+
+  async verifyUsername(username: string) {
+    const user = await this.userService.findByUsername(username);
+
+    if (user) {
+      throw new BadRequestException('Username is already taken');
+    }
+
+    return {
+      message: 'Username is available',
+    };
+  }
+
+  async verifyEmail(email: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (user) {
+      throw new BadRequestException('Email is already taken');
+    }
+
+    return {
+      message: 'Email is available',
+    };
   }
 }
