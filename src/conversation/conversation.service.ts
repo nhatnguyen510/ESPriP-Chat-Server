@@ -109,4 +109,22 @@ export class ConversationService {
       },
     });
   }
+
+  async deleteConversationById(id: string) {
+    const conversation = await this.prismaService.conversation.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!conversation) {
+      throw new BadRequestException('Conversation not found');
+    }
+
+    return this.prismaService.conversation.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }
