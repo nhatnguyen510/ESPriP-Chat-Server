@@ -78,4 +78,38 @@ export class UserService {
   async validatePassword(password: string, hashedPassword: string) {
     return await bcrypt.compare(password, hashedPassword);
   }
+
+  async searchUsers(query: string) {
+    return this.prismaService.user.findMany({
+      where: {
+        OR: [
+          {
+            first_name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            last_name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            username: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        username: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+      },
+    });
+  }
 }
