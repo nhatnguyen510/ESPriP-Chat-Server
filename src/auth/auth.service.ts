@@ -14,7 +14,6 @@ import { appConfig } from 'src/config/config.module';
 import { Payload } from 'src/types';
 import * as dayjs from 'dayjs';
 import * as argon2 from 'argon2';
-
 @Injectable()
 export class AuthService {
   constructor(

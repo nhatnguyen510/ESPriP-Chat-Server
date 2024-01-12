@@ -5,6 +5,7 @@ import { PrismaService, RedisService } from 'src/common/service';
 import { CustomSocket, OnlineFriends, SocketId, UserId } from './chat.type';
 import { EmitEvent, Status } from './chat.enum';
 import { RedisNameSpace } from 'src/enum';
+import { EncryptionService } from 'src/encryption/encryption.service';
 
 @Injectable()
 export class ChatService {
@@ -13,6 +14,7 @@ export class ChatService {
   constructor(
     redisService: RedisService,
     private readonly prismaService: PrismaService,
+    private readonly encryptionService: EncryptionService,
   ) {
     this._redis = redisService.client;
   }
@@ -35,6 +37,13 @@ export class ChatService {
     console.log('onlineFriends: ', onlineFriends);
     console.log('onlineFriendsIds: ', onlineFriendsIds);
     console.log('friendSocketIds: ', friendSocketIds);
+
+    const { prime, generator } = this.encryptionService.getPrimeAndGenerator();
+
+    server.to(socketId).emit(EmitEvent.PrimeAndGenerator, {
+      prime,
+      generator,
+    });
 
     server.to(socketId).emit(EmitEvent.OnlineFriends, onlineFriendsIds);
 

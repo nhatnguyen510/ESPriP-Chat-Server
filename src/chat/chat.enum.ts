@@ -13,6 +13,8 @@ export enum EmitEvent {
   MessageSent = 'message_sent',
   ReceiveMessage = 'receive_message',
   MessageSeen = 'message_seen',
+  PrimeAndGenerator = 'prime_and_generator',
+  FriendRequestAccepted = 'friend_request_accepted',
 }
 
 export enum Status {

@@ -22,7 +22,14 @@ export class MessageSendProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>, token?: string): Promise<any> {
+  async process(
+    job: Job<
+      { conversation_id: string; sender_id: string; message: string },
+      any,
+      string
+    >,
+    token?: string,
+  ): Promise<any> {
     const { data } = job;
     const { conversation_id, sender_id, message } = data;
 
