@@ -12,6 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { AppEnv } from 'src/enum';
+import { EncryptionConfig } from './encryption.config';
 
 class CorsOptions {
   @IsArray()
@@ -59,4 +60,8 @@ export class AppConfig {
   @Type(() => JwtOptions)
   @ValidateNested()
   public readonly jwt!: JwtOptions;
+
+  @Type(() => EncryptionConfig)
+  @ValidateNested()
+  public readonly encryption!: EncryptionConfig;
 }

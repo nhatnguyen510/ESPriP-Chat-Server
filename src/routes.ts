@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { MessageModule } from './message/message.module';
 import { FriendModule } from './friend/friend.module';
+import { EncryptionModule } from './encryption/encryption.module';
 
 export const routes: Routes = [
   {
@@ -32,5 +33,9 @@ export const routes: Routes = [
   {
     path: '/friends',
     module: FriendModule,
+  },
+  {
+    path: '/encryption',
+    module: EncryptionModule,
   },
 ];

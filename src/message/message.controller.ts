@@ -19,7 +19,7 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Post()
-  create(
+  createMessage(
     @GetCurrentUser('id') id: string,
     @Param('id') conversationId: string,
     @Body('message') message: string,

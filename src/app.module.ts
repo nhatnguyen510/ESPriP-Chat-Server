@@ -13,6 +13,7 @@ import { routes } from './routes';
 import { BullModule } from '@nestjs/bullmq';
 import { RedisConfig } from './config';
 import { ChatModule } from './chat/chat.module';
+import { EncryptionModule } from './encryption/encryption.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ChatModule } from './chat/chat.module';
     MessageModule,
     FriendModule,
     ChatModule,
+    EncryptionModule,
     RouterModule.register(routes),
     BullModule.forRootAsync({
       imports: [ConfigModule],

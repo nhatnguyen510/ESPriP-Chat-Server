@@ -10,12 +10,18 @@ import {
   RemoveFriendDto,
   SearchFriendsDto,
 } from './dto';
+import { ChatGateway } from 'src/chat/chat.gateway';
+import { ChatService } from 'src/chat/chat.service';
+import { RedisNameSpace } from 'src/enum';
+import { EmitEvent } from 'src/chat/chat.enum';
 
 @Injectable()
 export class FriendService {
   constructor(
     private prismaService: PrismaService,
     private userService: UserService,
+    private chatGateway: ChatGateway,
+    private chatService: ChatService,
   ) {}
   getFriendRequests(getFriendRequestDto: GetFriendRequestsDto) {
     const { user_id } = getFriendRequestDto;
@@ -238,6 +244,16 @@ export class FriendService {
         status: 'Accepted',
         accepted_user_public_key,
       },
+      include: {
+        accepted_user: {
+          select: {
+            id: true,
+            username: true,
+            first_name: true,
+            last_name: true,
+          },
+        },
+      },
     });
 
     // create a new Conversation
@@ -255,6 +271,20 @@ export class FriendService {
         },
       },
     });
+
+    const requestedUserSocketId = await this.chatService.getSocketIdFromRedis(
+      RedisNameSpace.Online,
+      requested_user_id,
+    );
+
+    if (requestedUserSocketId) {
+      this.chatGateway.server
+        .to(requestedUserSocketId)
+        .emit(EmitEvent.FriendRequestAccepted, {
+          conversation: newConversation,
+          friendRequest: updatedFriendRequest,
+        });
+    }
 
     return {
       message: 'Friend request accepted successfully',
@@ -310,10 +340,16 @@ export class FriendService {
       .then((friends) => {
         return friends.map((friend) => {
           if (!friend.accepted_user) {
-            return friend.requested_user;
+            return {
+              ...friend.requested_user,
+              friend_public_key: friend.requested_user_public_key,
+            };
           }
           if (!friend.requested_user) {
-            return friend.accepted_user;
+            return {
+              ...friend.accepted_user,
+              friend_public_key: friend.accepted_user_public_key,
+            };
           }
         });
       });
@@ -421,30 +457,16 @@ export class FriendService {
     }
 
     // remove the conversation between the two users
-    const deleteConversation = this.prismaService.conversation.deleteMany({
+    const deleteConversation = this.prismaService.conversation.delete({
       where: {
-        participants: {
-          every: {
-            id: {
-              in: [user_id, friend_id],
-            },
-          },
-        },
+        id: conversation.id,
       },
     });
 
-    const deleteFriend = this.prismaService.friend.deleteMany({
+    // remove the friend
+    const deleteFriend = this.prismaService.friend.delete({
       where: {
-        OR: [
-          {
-            requested_user_id: user_id,
-            accepted_user_id: friend_id,
-          },
-          {
-            requested_user_id: friend_id,
-            accepted_user_id: user_id,
-          },
-        ],
+        id: friend.id,
       },
     });
 
@@ -464,7 +486,6 @@ export class FriendService {
     });
 
     // find friends in the friend list that match the query
-
     const matchedFriends = friendList.filter((friend) => {
       return (
         friend.username.includes(query) ||
