@@ -72,6 +72,8 @@ export class UserService {
       );
     }
 
+    console.log({ updateUserDto });
+
     return this.prismaService.user.update({
       where: { id },
       data: updateUserDto,
@@ -115,6 +117,7 @@ export class UserService {
         username: true,
         first_name: true,
         last_name: true,
+        avatar_url: true,
         email: true,
       },
     });

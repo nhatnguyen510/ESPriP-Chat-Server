@@ -17,6 +17,7 @@ model User {
   password               String
   first_name             String
   last_name              String
+  avatar_url             String?
   email                  String         @unique
   is_verified            Boolean        @default(false)
   master_key             String?
