@@ -14,12 +14,14 @@ import { appConfig } from 'src/config/config.module';
 import { Payload } from 'src/types';
 import * as dayjs from 'dayjs';
 import * as argon2 from 'argon2';
+import { EncryptionService } from 'src/encryption/encryption.service';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private encryptionService: EncryptionService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -56,10 +58,15 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;
 
+    console.log('password: ', password);
+
+    const masterKey = this.encryptionService.deriveMasterKey(password);
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
       refresh_token_id: token.id,
+      master_key: masterKey,
       ...rest,
     };
   }

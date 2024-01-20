@@ -5,9 +5,10 @@ import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy, LoginStrategy, RefreshTokenStrategy } from './strategy';
 import { JwtAuthGuard, LoginGuard, RefreshTokenGuard } from './guard';
+import { EncryptionModule } from 'src/encryption/encryption.module';
 
 @Module({
-  imports: [UserModule, JwtModule],
+  imports: [UserModule, JwtModule, EncryptionModule],
   controllers: [AuthController],
   providers: [
     AuthService,
