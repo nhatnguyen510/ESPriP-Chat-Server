@@ -25,6 +25,9 @@ export class LoginStrategy extends PassportStrategy(Strategy, 'login') {
     if (!isPasswordValid) {
       throw new BadRequestException('Password is not valid');
     }
-    return user;
+    return {
+      ...user,
+      password,
+    };
   }
 }

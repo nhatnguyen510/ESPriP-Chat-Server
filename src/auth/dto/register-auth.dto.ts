@@ -36,4 +36,7 @@ export class RegisterDto {
   @MinLength(4)
   @MaxLength(20)
   last_name!: string;
+
+  @IsString()
+  avatar_url?: string;
 }

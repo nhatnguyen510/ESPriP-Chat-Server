@@ -38,13 +38,6 @@ export class ChatService {
     console.log('onlineFriendsIds: ', onlineFriendsIds);
     console.log('friendSocketIds: ', friendSocketIds);
 
-    const { prime, generator } = this.encryptionService.getPrimeAndGenerator();
-
-    server.to(socketId).emit(EmitEvent.PrimeAndGenerator, {
-      prime,
-      generator,
-    });
-
     server.to(socketId).emit(EmitEvent.OnlineFriends, onlineFriendsIds);
 
     server.to(friendSocketIds).emit(EmitEvent.UserOnline, {

@@ -4,6 +4,8 @@ import { appConfig } from 'src/config/config.module';
 import { createDiffieHellman, DiffieHellman, pbkdf2Sync } from 'crypto';
 import { SaveSessionKeyDto } from './dto/save-session-key.dto';
 import { User } from '@prisma/client';
+import { SaveKeysDto } from './dto/save-keys.dto';
+import { UpdateKeysDto } from './dto/update-keys.dto';
 
 @Injectable()
 export class EncryptionService {
@@ -73,6 +75,58 @@ export class EncryptionService {
         },
         encrypted_key,
         iv,
+      },
+    });
+  }
+
+  async saveKeys(user: User, saveKeysDto: SaveKeysDto) {
+    const { encrypted_private_key, public_key, iv } = saveKeysDto;
+
+    return this.prismaService.keys.create({
+      data: {
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+        encrypted_private_key,
+        public_key,
+        iv,
+      },
+    });
+  }
+
+  async getKeys(user: User) {
+    const keys = await this.prismaService.keys.findUnique({
+      where: {
+        user_id: user.id,
+      },
+    });
+
+    return keys;
+  }
+
+  async updateKeys(user: User, updateKeysDto: UpdateKeysDto) {
+    const { encrypted_private_key, public_key, iv } = updateKeysDto;
+
+    const updatedKey = await this.prismaService.keys.update({
+      where: {
+        user_id: user.id,
+      },
+      data: {
+        encrypted_private_key,
+        public_key,
+        iv,
+      },
+    });
+
+    return updatedKey;
+  }
+
+  async deleteKeys(user: User) {
+    return this.prismaService.keys.deleteMany({
+      where: {
+        user_id: user.id,
       },
     });
   }

@@ -14,7 +14,8 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { username, email, password, first_name, last_name } = createUserDto;
+    const { username, email, password, first_name, last_name, avatar_url } =
+      createUserDto;
     const isUserExist = await this.prismaService.user.findFirst({
       where: {
         OR: [
@@ -34,8 +35,6 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(password, roundsOfHashing);
 
-    const masterKey = this.encryptionService.deriveMasterKey(password);
-
     return this.prismaService.user.create({
       data: {
         username,
@@ -43,7 +42,7 @@ export class UserService {
         email,
         first_name,
         last_name,
-        master_key: masterKey,
+        avatar_url,
       },
     });
   }
