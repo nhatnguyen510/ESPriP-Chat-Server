@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/common/service';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto, ChangeUserPasswordDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { EncryptionService } from 'src/encryption/encryption.service';
+import { User } from '@prisma/client';
 
 export const roundsOfHashing = 10;
 
@@ -85,6 +86,50 @@ export class UserService {
 
   async validatePassword(password: string, hashedPassword: string) {
     return await bcrypt.compare(password, hashedPassword);
+  }
+
+  async changePassword(
+    user: User,
+    changeUserPasswordDto: ChangeUserPasswordDto,
+  ) {
+    const { old_password, new_password, confirmed_new_password } =
+      changeUserPasswordDto;
+
+    if (new_password !== confirmed_new_password) {
+      throw new BadRequestException('New passwords do not match');
+    }
+
+    if (old_password === new_password) {
+      throw new BadRequestException(
+        'New password cannot be the same as old password',
+      );
+    }
+
+    const isPasswordValid = await this.validatePassword(
+      old_password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Old password is incorrect');
+    }
+
+    await this.encryptionService.updateKeysWithNewPassword(
+      user,
+      old_password,
+      new_password,
+    );
+
+    const hashedPassword = await bcrypt.hash(new_password, roundsOfHashing);
+
+    return this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
   }
 
   async searchUsers(query: string) {
