@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Param, Query, Put } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { ChangeUserPasswordDto, CreateUserDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 import { GetCurrentUser } from 'src/auth/decorator';
+import { User } from '@prisma/client';
 
 @Controller()
 export class UserController {
@@ -33,5 +34,13 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Put('/update/password')
+  async changePassword(
+    @GetCurrentUser() user: User,
+    @Body() changeUserPasswordDto: ChangeUserPasswordDto,
+  ) {
+    return this.userService.changePassword(user, changeUserPasswordDto);
   }
 }

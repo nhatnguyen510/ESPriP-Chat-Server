@@ -2,10 +2,14 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/common/service';
 import { appConfig } from 'src/config/config.module';
 import { createDiffieHellman, DiffieHellman, pbkdf2Sync } from 'crypto';
-import { SaveSessionKeyDto } from './dto/save-session-key.dto';
 import { User } from '@prisma/client';
-import { SaveKeysDto } from './dto/save-keys.dto';
-import { UpdateKeysDto } from './dto/update-keys.dto';
+import * as crypto from 'crypto';
+import {
+  SaveKeysDto,
+  SaveSessionKeyDto,
+  UpdateKeysDto,
+  UpdateSessionKeyDto,
+} from './dto';
 
 @Injectable()
 export class EncryptionService {
@@ -43,11 +47,29 @@ export class EncryptionService {
       },
     });
 
-    if (!encryption) {
-      throw new BadRequestException('No encryption key found');
-    }
-
     return encryption;
+  }
+
+  async getAllDecryptedSessionKeys(user: User, password: string) {
+    const encryption = await this.prismaService.encryption.findMany({
+      where: {
+        user_id: user.id,
+      },
+    });
+
+    const userMasterKey = this.deriveMasterKey(password);
+
+    return await Promise.all(
+      encryption.map(async (sessionKey) => {
+        return this.decryptSessionKey(
+          {
+            encryptedData: sessionKey.encrypted_key,
+            iv: sessionKey.iv,
+          },
+          Buffer.from(userMasterKey, 'hex'),
+        );
+      }),
+    );
   }
 
   async saveSessionKey(user: User, saveSessionKeyDto: SaveSessionKeyDto) {
@@ -123,11 +145,129 @@ export class EncryptionService {
     return updatedKey;
   }
 
+  async updateSessionKey(user: User, updateSessionKeyDto: UpdateSessionKeyDto) {
+    const { encryption_id, encrypted_key, iv } = updateSessionKeyDto;
+
+    const updatedSessionKey = await this.prismaService.encryption.update({
+      where: {
+        id: encryption_id,
+      },
+      data: {
+        encrypted_key,
+        iv,
+      },
+    });
+
+    return updatedSessionKey;
+  }
+
   async deleteKeys(user: User) {
     return this.prismaService.keys.deleteMany({
       where: {
         user_id: user.id,
       },
     });
+  }
+
+  encrypt(text: string, key: Buffer) {
+    const iv = crypto.randomBytes(16); // Generate a random initialization vector
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return { iv: iv.toString('hex'), encryptedData: encrypted };
+  }
+
+  decrypt(encryptedData: { iv: string; encryptedData: string }, key: Buffer) {
+    try {
+      const decipher = crypto.createDecipheriv(
+        'aes-256-cbc',
+        key,
+        Buffer.from(encryptedData.iv, 'hex'),
+      );
+      let decrypted = decipher.update(
+        encryptedData.encryptedData,
+        'hex',
+        'utf8',
+      );
+      decrypted += decipher.final('utf8');
+      return decrypted;
+    } catch (error) {
+      throw new BadRequestException('The provided key is not correct');
+    }
+  }
+
+  // Encrypt the session key using the master key and AES
+  encryptSessionKey(sessionKey: string, masterKey: Buffer) {
+    return this.encrypt(sessionKey, masterKey);
+  }
+
+  // Decrypt the session key using the master key and AES
+  decryptSessionKey(
+    encryptedSessionKey: {
+      iv: string;
+      encryptedData: string;
+    },
+    masterKey: Buffer,
+  ) {
+    return this.decrypt(encryptedSessionKey, masterKey);
+  }
+
+  async updateKeysWithNewPassword(
+    user: User,
+    old_password: string,
+    new_password: string,
+  ) {
+    // TODO: Use master key from the old password to decrypt the private key and encrypt it with the new password
+    const oldMasterKey = this.deriveMasterKey(old_password);
+    const newMasterKey = this.deriveMasterKey(new_password);
+
+    const existedKeys = await this.getKeys(user);
+    const existedSessionKeys = await this.getAllSessionKeys(user);
+
+    if (existedKeys) {
+      const decryptedPrivateKey = this.decrypt(
+        {
+          iv: existedKeys.iv,
+          encryptedData: existedKeys.encrypted_private_key,
+        },
+        Buffer.from(oldMasterKey, 'hex'),
+      );
+
+      const encryptedPrivateKey = this.encrypt(
+        decryptedPrivateKey,
+        Buffer.from(newMasterKey, 'hex'),
+      );
+
+      await this.updateKeys(user, {
+        encrypted_private_key: encryptedPrivateKey.encryptedData,
+        public_key: existedKeys.public_key,
+        iv: encryptedPrivateKey.iv,
+      });
+    }
+
+    if (existedSessionKeys) {
+      await Promise.all(
+        existedSessionKeys.map(async (sessionKey) => {
+          const decryptedSessionKey = this.decrypt(
+            {
+              iv: sessionKey.iv,
+              encryptedData: sessionKey.encrypted_key,
+            },
+            Buffer.from(oldMasterKey, 'hex'),
+          );
+
+          const encryptedSessionKey = this.encrypt(
+            decryptedSessionKey,
+            Buffer.from(newMasterKey, 'hex'),
+          );
+
+          return this.updateSessionKey(user, {
+            encryption_id: sessionKey.id,
+            encrypted_key: encryptedSessionKey.encryptedData,
+            iv: encryptedSessionKey.iv,
+          });
+        }),
+      );
+    }
   }
 }

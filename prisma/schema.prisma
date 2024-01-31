@@ -63,7 +63,7 @@ model Message {
   id              String       @id @default(auto()) @map("_id") @db.ObjectId
   conversation    Conversation @relation("ConversationMessages", fields: [conversation_id], references: [id], onDelete: Cascade)
   conversation_id String       @db.ObjectId
-  sender          User         @relation("MessageSender", fields: [sender_id], references: [id])
+  sender          User         @relation("MessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
   sender_id       String       @db.ObjectId
   message         String
   seen            Boolean      @default(false)

@@ -20,6 +20,14 @@ export class EncryptionController {
     return this.encryptionService.getAllSessionKeys(user);
   }
 
+  @Post('/session-keys/decrypt')
+  async getAllDecryptedSessionKeys(
+    @GetCurrentUser() user: User,
+    @Body('password') password: string,
+  ) {
+    return this.encryptionService.getAllDecryptedSessionKeys(user, password);
+  }
+
   @Post('/session-key')
   async saveSessionKey(
     @GetCurrentUser() user: User,
