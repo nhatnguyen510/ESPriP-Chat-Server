@@ -8,7 +8,9 @@
       {
         "include": "config.yaml",
         "outDir": "./dist/config"
-      }
-    ]
+      },
+      "mail/templates/**/*"
+    ],
+    "watchAssets": true
   }
 }

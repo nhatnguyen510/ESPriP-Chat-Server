@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { AppEnv } from 'src/enum';
-import { EncryptionConfig } from './encryption.config';
+import { EncryptionConfig } from './';
 
 class CorsOptions {
   @IsArray()
@@ -64,4 +64,8 @@ export class AppConfig {
   @Type(() => EncryptionConfig)
   @ValidateNested()
   public readonly encryption!: EncryptionConfig;
+
+  @IsString()
+  @IsNotEmpty()
+  public readonly clientUrl!: string;
 }

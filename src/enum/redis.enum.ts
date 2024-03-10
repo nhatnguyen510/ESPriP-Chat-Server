@@ -3,4 +3,5 @@ export enum RedisNameSpace {
   Message = 'message:',
   Typing = 'typing:',
   User = 'user:',
+  ResetPasswordToken = 'reset-password-token:',
 }

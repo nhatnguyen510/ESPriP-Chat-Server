@@ -216,9 +216,10 @@ export class EncryptionService {
     user: User,
     old_password: string,
     new_password: string,
+    old_master_key: string = null,
   ) {
     // TODO: Use master key from the old password to decrypt the private key and encrypt it with the new password
-    const oldMasterKey = this.deriveMasterKey(old_password);
+    const oldMasterKey = old_master_key || this.deriveMasterKey(old_password);
     const newMasterKey = this.deriveMasterKey(new_password);
 
     const existedKeys = await this.getKeys(user);

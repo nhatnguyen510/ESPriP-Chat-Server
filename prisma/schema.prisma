@@ -20,6 +20,7 @@ model User {
   avatar_url             String?
   email                  String         @unique
   is_verified            Boolean        @default(false)
+  master_key             String?
   created_at             DateTime       @default(now())
   updated_at             DateTime       @updatedAt
   tokens                 Token[]
