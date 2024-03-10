@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto';
+import { RegisterDto, ResetPasswordDto } from './dto';
 import { User } from '@prisma/client';
 import { LoginGuard, RefreshTokenGuard } from './guard';
 import { GetCurrentUser, IsPublic } from './decorator';
@@ -54,5 +54,17 @@ export class AuthController {
   @Post('/verify/email')
   async verifyEmail(@Body('email') email: string) {
     return this.authService.verifyEmail(email);
+  }
+
+  @IsPublic()
+  @Post('/forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @IsPublic()
+  @Post('/reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }

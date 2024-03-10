@@ -36,6 +36,8 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(password, roundsOfHashing);
 
+    const masterKey = this.encryptionService.deriveMasterKey(password);
+
     return this.prismaService.user.create({
       data: {
         username,
@@ -44,6 +46,7 @@ export class UserService {
         first_name,
         last_name,
         avatar_url,
+        master_key: masterKey,
       },
     });
   }
@@ -70,6 +73,24 @@ export class UserService {
         updateUserDto.password,
         roundsOfHashing,
       );
+    }
+
+    if (updateUserDto.username) {
+      const isUsernameExisted = await this.findByUsername(
+        updateUserDto.username,
+      );
+
+      if (isUsernameExisted) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
+
+    if (updateUserDto.email) {
+      const isEmailExisted = await this.findByEmail(updateUserDto.email);
+
+      if (isEmailExisted) {
+        throw new BadRequestException('Email already exists');
+      }
     }
 
     console.log({ updateUserDto });
@@ -120,15 +141,11 @@ export class UserService {
       new_password,
     );
 
-    const hashedPassword = await bcrypt.hash(new_password, roundsOfHashing);
+    const newMasterKey = this.encryptionService.deriveMasterKey(new_password);
 
-    return this.prismaService.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        password: hashedPassword,
-      },
+    return this.update(user.id, {
+      password: new_password,
+      master_key: newMasterKey,
     });
   }
 

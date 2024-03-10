@@ -39,4 +39,7 @@ export class CreateUserDto {
 
   @IsString()
   avatar_url?: string;
+
+  @IsString()
+  master_key?: string;
 }

@@ -14,6 +14,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { RedisConfig } from './config';
 import { ChatModule } from './chat/chat.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { EncryptionModule } from './encryption/encryption.module';
         },
       }),
     }),
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
