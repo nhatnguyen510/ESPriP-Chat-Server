@@ -67,6 +67,7 @@ model Message {
   sender          User         @relation("MessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
   sender_id       String       @db.ObjectId
   message         String
+  iv              String?
   seen            Boolean      @default(false)
   created_at      DateTime     @default(now())
   updated_at      DateTime     @updatedAt

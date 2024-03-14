@@ -24,14 +24,19 @@ export class MessageSendProcessor extends WorkerHost {
 
   async process(
     job: Job<
-      { conversation_id: string; sender_id: string; message: string },
+      {
+        conversation_id: string;
+        sender_id: string;
+        message: string;
+        iv: string;
+      },
       any,
       string
     >,
     token?: string,
   ): Promise<any> {
     const { data } = job;
-    const { conversation_id, sender_id, message } = data;
+    const { conversation_id, sender_id, message, iv } = data;
 
     const createdMessage = await this.prismaService.message.create({
       data: {
@@ -46,6 +51,7 @@ export class MessageSendProcessor extends WorkerHost {
           },
         },
         message,
+        iv,
       },
     });
 

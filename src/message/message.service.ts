@@ -13,12 +13,13 @@ export class MessageService {
   ) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
-    const { conversation_id, sender_id, message } = createMessageDto;
+    const { conversation_id, sender_id, message, iv } = createMessageDto;
 
     const job = await this.send_message_queue.add('send-message', {
       conversation_id,
       sender_id,
       message,
+      iv,
     });
 
     return {
