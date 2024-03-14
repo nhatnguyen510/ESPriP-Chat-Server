@@ -7,9 +7,15 @@ import {
   UseGuards,
   Query,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { CreateMessageDto, GetMessagesDto, SeenMessageDto } from './dto';
+import {
+  CreateMessageDto,
+  GetMessagesDto,
+  SeenMessageDto,
+  UpdateMessageDto,
+} from './dto';
 import { MessageGuard } from './guard/message.guard';
 import { GetCurrentUser } from 'src/auth/decorator';
 
@@ -22,12 +28,13 @@ export class MessageController {
   createMessage(
     @GetCurrentUser('id') id: string,
     @Param('id') conversationId: string,
-    @Body('message') message: string,
+    @Body() { message, iv }: CreateMessageDto,
   ) {
     const createMessageDto: CreateMessageDto = {
       sender_id: id,
       conversation_id: conversationId,
       message,
+      iv,
     };
     return this.messageService.createMessage(createMessageDto);
   }

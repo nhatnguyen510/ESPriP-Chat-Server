@@ -14,8 +14,6 @@ export class MessageGuard implements CanActivate {
     const user = request.user as User;
     const conversationId = request.params.id;
 
-    console.log({ user, conversationId });
-
     // check if user is in the conversation
     const isUserInTheConversation =
       user.conversation_ids.includes(conversationId);
