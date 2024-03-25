@@ -103,20 +103,14 @@ export class MessageSendProcessor extends WorkerHost {
       result.message.sender_id,
     );
 
-    console.log('userSocketId: ', userSocketId);
-
     const receiverId = result.updatedConversation.participants_ids.find(
       (id) => id !== result.message.sender_id,
     );
-
-    console.log('receiverId: ', receiverId);
 
     const receiverSocketId = await this.chatService.getSocketIdFromRedis(
       RedisNameSpace.Online,
       receiverId,
     );
-
-    console.log('receiverSocketId: ', receiverSocketId);
 
     if (userSocketId) {
       this.chatGateway.server

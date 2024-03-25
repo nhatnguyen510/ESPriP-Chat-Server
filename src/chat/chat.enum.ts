@@ -2,6 +2,7 @@ export enum ListenEvent {
   Connect = 'connect',
   PrivateMessage = 'private_message',
   MarkMessageAsSeen = 'mark_message_as_seen',
+  SendFriendRequest = 'send_friend_request',
 }
 
 export enum EmitEvent {
@@ -15,6 +16,7 @@ export enum EmitEvent {
   MessageSeen = 'message_seen',
   PrimeAndGenerator = 'prime_and_generator',
   FriendRequestAccepted = 'friend_request_accepted',
+  FriendRequestReceived = 'friend_request_received',
 }
 
 export enum Status {

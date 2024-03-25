@@ -28,7 +28,6 @@ export class ChatAdapter extends IoAdapter {
     server.use(async (socket: CustomSocket, next) => {
       const token = socket.handshake.auth.token;
 
-      console.log('token in chat', token);
       const user = await this.authService.verifyToken(token);
       if (!user) {
         return next(new Error('Unauthorized'));

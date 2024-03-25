@@ -67,7 +67,8 @@ export class UserService {
     return this.prismaService.user.findUnique({ where: { email } });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(user: User, updateUserDto: UpdateUserDto) {
+    const { id, username, email } = user;
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(
         updateUserDto.password,
@@ -80,7 +81,7 @@ export class UserService {
         updateUserDto.username,
       );
 
-      if (isUsernameExisted) {
+      if (isUsernameExisted && isUsernameExisted.username !== username) {
         throw new BadRequestException('Username already exists');
       }
     }
@@ -88,12 +89,10 @@ export class UserService {
     if (updateUserDto.email) {
       const isEmailExisted = await this.findByEmail(updateUserDto.email);
 
-      if (isEmailExisted) {
+      if (isEmailExisted && isEmailExisted.email !== email) {
         throw new BadRequestException('Email already exists');
       }
     }
-
-    console.log({ updateUserDto });
 
     return this.prismaService.user.update({
       where: { id },
@@ -143,7 +142,7 @@ export class UserService {
 
     const newMasterKey = this.encryptionService.deriveMasterKey(new_password);
 
-    return this.update(user.id, {
+    return this.update(user, {
       password: new_password,
       master_key: newMasterKey,
     });

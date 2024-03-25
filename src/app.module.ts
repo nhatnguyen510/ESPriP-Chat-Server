@@ -7,14 +7,15 @@ import { ConfigModule } from './config/config.module';
 import { UserModule } from './user/user.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { MessageModule } from './message/message.module';
-import { RouterModule } from '@nestjs/core';
+import { APP_GUARD, RouterModule } from '@nestjs/core';
 import { FriendModule } from './friend/friend.module';
 import { routes } from './routes';
 import { BullModule } from '@nestjs/bullmq';
-import { RedisConfig } from './config';
+import { AppConfig, RedisConfig } from './config';
 import { ChatModule } from './chat/chat.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { MailModule } from './mail/mail.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -39,9 +40,31 @@ import { MailModule } from './mail/mail.module';
         },
       }),
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [AppConfig],
+      useFactory: (appConfig: AppConfig) => {
+        console.log(appConfig.throttle.limit, appConfig.throttle.ttl);
+
+        return {
+          throttlers: [
+            {
+              ttl: appConfig.throttle.ttl,
+              limit: appConfig.throttle.limit,
+            },
+          ],
+        };
+      },
+    }),
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

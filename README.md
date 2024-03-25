@@ -26,6 +26,14 @@
 
 This documentation provides an overview of the API routes available in the Chat Application built with NestJS. The API allows users to perform various actions related to authentication, conversations, messages, and friends.
 
+# Getting started
+
+Run the development server:
+
+```bash
+docker-compose up
+```
+
 ## Authentication
 
 ### Login
@@ -138,6 +146,29 @@ This documentation provides an overview of the API routes available in the Chat 
 - Description: Accepts a pending friend request from another user.
 - Request Body: `{ "requested_user_id": "652cc5335a13404d21b7614e", "accepted_user_public_key": "hereismypublickey" }`
 - Response: Returns a success message upon accepting the friend request.
+
+## Encryption
+
+### Get Prime and Generator
+
+- Endpoint: `/encryption`
+- Method: Get
+- Description: Get Prime and Generator for creating a pair of keys.
+- Response: Returns the prime and generator.
+
+### Get all session keys
+
+- Endpoint: `/encryption/session-keys`
+- Method: Get
+- Description: Get all user's session keys.
+- Response: Returns the user's session keys.
+
+### Save session key
+
+- Endpoint: `/encryption/session-keys`
+- Method: Post
+- Description: Save the user's encrypted session key in database for secure storage.
+- Response: Returns the user's session key.
 
 ## Support
 

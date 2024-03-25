@@ -187,6 +187,15 @@ export class FriendService {
             avatar_url: true,
           },
         },
+        requested_user: {
+          select: {
+            id: true,
+            username: true,
+            first_name: true,
+            last_name: true,
+            avatar_url: true,
+          },
+        },
       },
     });
   }

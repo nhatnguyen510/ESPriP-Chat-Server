@@ -9,6 +9,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guard';
 import { RedisService } from './common/service';
 import { ChatAdapter } from './chat/chat.adapter';
+import helmet from '@fastify/helmet';
+import fastifyCsrf from '@fastify/csrf-protection';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -25,6 +27,10 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api/v1');
+
+  await app.register(helmet);
+
+  await app.register(fastifyCsrf);
 
   app.useGlobalPipes(
     new ValidationPipe({

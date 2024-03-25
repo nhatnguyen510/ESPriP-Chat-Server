@@ -6,6 +6,7 @@ import { CustomSocket, OnlineFriends, SocketId, UserId } from './chat.type';
 import { EmitEvent, Status } from './chat.enum';
 import { RedisNameSpace } from 'src/enum';
 import { EncryptionService } from 'src/encryption/encryption.service';
+import { Friend } from '@prisma/client';
 
 @Injectable()
 export class ChatService {
@@ -33,10 +34,6 @@ export class ChatService {
     const friendSocketIds = this.getFriendsSocketIds(onlineFriends);
 
     const onlineFriendsIds = this.getOnlineFriendsIds(onlineFriends);
-
-    console.log('onlineFriends: ', onlineFriends);
-    console.log('onlineFriendsIds: ', onlineFriendsIds);
-    console.log('friendSocketIds: ', friendSocketIds);
 
     server.to(socketId).emit(EmitEvent.OnlineFriends, onlineFriendsIds);
 
@@ -79,6 +76,21 @@ export class ChatService {
         sender_id: userId,
         seen,
       });
+    }
+  }
+
+  async sendFriendRequest(server: Server, client: CustomSocket, data: Friend) {
+    const { accepted_user_id } = data;
+
+    const acceptedUserSocketId = await this.getSocketIdFromRedis(
+      RedisNameSpace.Online,
+      accepted_user_id,
+    );
+
+    if (acceptedUserSocketId) {
+      server
+        .to(acceptedUserSocketId)
+        .emit(EmitEvent.FriendRequestReceived, data);
     }
   }
 

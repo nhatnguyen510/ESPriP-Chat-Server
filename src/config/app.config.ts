@@ -41,6 +41,16 @@ class JwtOptions {
   public readonly refreshSecret!: string;
 }
 
+class ThrottleOptions {
+  @IsNumber()
+  @Min(0)
+  public readonly limit!: number;
+
+  @IsNumber()
+  @Min(0)
+  public readonly ttl!: number;
+}
+
 export class AppConfig {
   @IsIn(Object.values(AppEnv))
   public readonly env!: AppEnv;
@@ -60,6 +70,10 @@ export class AppConfig {
   @Type(() => JwtOptions)
   @ValidateNested()
   public readonly jwt!: JwtOptions;
+
+  @Type(() => ThrottleOptions)
+  @ValidateNested()
+  public readonly throttle!: ThrottleOptions;
 
   @Type(() => EncryptionConfig)
   @ValidateNested()

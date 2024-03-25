@@ -30,10 +30,10 @@ export class UserController {
 
   @Put('/update')
   async update(
-    @GetCurrentUser('id') id: string,
+    @GetCurrentUser() user: User,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.update(id, updateUserDto);
+    return this.userService.update(user, updateUserDto);
   }
 
   @Put('/update/password')

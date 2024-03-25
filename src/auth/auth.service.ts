@@ -74,7 +74,7 @@ export class AuthService {
     if (!master_key) {
       const masterKey = this.encryptionService.deriveMasterKey(password);
 
-      await this.userService.update(user.id, {
+      await this.userService.update(user, {
         master_key: masterKey,
       });
 
@@ -237,8 +237,6 @@ export class AuthService {
         secret: appConfig.jwt.secret,
       });
 
-      console.log('payload in chat adapter: ', payload);
-
       const user = await this.userService.findOne(payload.id);
 
       if (!user) {
@@ -247,7 +245,6 @@ export class AuthService {
 
       return user;
     } catch (err) {
-      console.log('error in chat adapter: ', err);
       return null;
     }
   }
@@ -379,7 +376,7 @@ export class AuthService {
 
     const newMasterKey = this.encryptionService.deriveMasterKey(password);
 
-    await this.userService.update(user.id, {
+    await this.userService.update(user, {
       password,
       master_key: newMasterKey,
     });

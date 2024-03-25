@@ -12,6 +12,7 @@ import { Server } from 'socket.io';
 import { CustomSocket } from './chat.type';
 import { ChatService } from './chat.service';
 import { ListenEvent } from './chat.enum';
+import { Friend } from '@prisma/client';
 
 @Injectable()
 @WebSocketGateway({
@@ -26,12 +27,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly chatService: ChatService) {}
 
   async handleConnection(client: CustomSocket): Promise<void> {
-    console.log('client: ', client['user']);
     console.log('connected: ', client.id);
     await this.chatService.connect(this.server, client);
   }
   async handleDisconnect(client: CustomSocket): Promise<void> {
-    console.log('disconnected: ', client['user']);
     console.log('disconnected: ', client.id);
     await this.chatService.disconnect(this.server, client);
   }
@@ -42,6 +41,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: CustomSocket,
   ): Promise<void> {
     await this.chatService.markMessageAsSeen(this.server, client, data);
+  }
+
+  @SubscribeMessage(ListenEvent.SendFriendRequest)
+  async sendFriendRequest(
+    @MessageBody() data: Friend,
+    @ConnectedSocket() client: CustomSocket,
+  ): Promise<void> {
+    await this.chatService.sendFriendRequest(this.server, client, data);
   }
 
   @SubscribeMessage('identity')
