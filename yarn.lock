@@ -1026,19 +1026,19 @@
     multer "1.4.4-lts.1"
     tslib "2.6.2"
 
-"@nestjs/platform-fastify@^11.1.14":
-  version "11.1.14"
-  resolved "https://registry.yarnpkg.com/@nestjs/platform-fastify/-/platform-fastify-11.1.14.tgz#72010d19738750ec57703bc188c784c217f46c9e"
-  integrity sha512-/hnKvPpeH+CTWus7L+F+qXkdbTRXudSQU3Z8tcs5kfvluoBLsxSDTTvjjySr7zrPs5bebaFbGIyG2fKMAWl++g==
+"@nestjs/platform-fastify@^11.1.24":
+  version "11.1.24"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-fastify/-/platform-fastify-11.1.24.tgz#ffedcb93ccebb5db8fee0be419d236b9e36851e5"
+  integrity sha512-AJAVZZKCLQcDkQipD+NfrmV69DoQRNnrE+EB0VBS7FEZRjsnNmkmZFDFnhl/JWgzm6rjxsI3Qdaj/0+VlgbfSg==
   dependencies:
     "@fastify/cors" "11.2.0"
     "@fastify/formbody" "8.0.2"
     fast-querystring "1.1.2"
-    fastify "5.7.4"
+    fastify "5.8.5"
     fastify-plugin "5.1.0"
-    find-my-way "9.4.0"
+    find-my-way "9.6.0"
     light-my-request "6.6.0"
-    path-to-regexp "8.3.0"
+    path-to-regexp "8.4.2"
     reusify "1.1.0"
     tslib "2.8.1"
 
@@ -3587,10 +3587,10 @@ fastify-plugin@^4.0.0, fastify-plugin@^4.2.1:
   resolved "https://registry.npmjs.org/fastify-plugin/-/fastify-plugin-4.5.1.tgz"
   integrity sha512-stRHYGeuqpEZTL1Ef0Ovr2ltazUT9g844X5z/zEBFLG8RYlpDiOCIG+ATvYEp+/zmc7sN29mcIMp8gvYplYPIQ==
 
-fastify@5.7.4:
-  version "5.7.4"
-  resolved "https://registry.yarnpkg.com/fastify/-/fastify-5.7.4.tgz#c5779ec5a509f5ea0a6b4232855eddb7125da129"
-  integrity sha512-e6l5NsRdaEP8rdD8VR0ErJASeyaRbzXYpmkrpr2SuvuMq6Si3lvsaVy5C+7gLanEkvjpMDzBXWE5HPeb/hgTxA==
+fastify@5.8.5:
+  version "5.8.5"
+  resolved "https://registry.yarnpkg.com/fastify/-/fastify-5.8.5.tgz#c452224295e0ca550bcd0efc3f7d3e90e9c11955"
+  integrity sha512-Yqptv59pQzPgQUSIm87hMqHJmdkb1+GPxdE6vW6FRyVE9G86mt7rOghitiU4JHRaTyDUk9pfeKmDeu70lAwM4Q==
   dependencies:
     "@fastify/ajv-compiler" "^4.0.5"
     "@fastify/error" "^4.0.0"
@@ -3601,7 +3601,7 @@ fastify@5.7.4:
     fast-json-stringify "^6.0.0"
     find-my-way "^9.0.0"
     light-my-request "^6.0.0"
-    pino "^10.1.0"
+    pino "^9.14.0 || ^10.1.0"
     process-warning "^5.0.0"
     rfdc "^1.3.1"
     secure-json-parse "^4.0.0"
@@ -3670,19 +3670,10 @@ finalhandler@1.2.0:
     statuses "2.0.1"
     unpipe "~1.0.0"
 
-find-my-way@9.4.0:
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/find-my-way/-/find-my-way-9.4.0.tgz#ef9c1e27e6f0b518b0f0af5ae3e349a0c3b4ff59"
-  integrity sha512-5Ye4vHsypZRYtS01ob/iwHzGRUDELlsoCftI/OZFhcLs1M0tkGPcXldE80TAZC5yYuJMBPJQQ43UHlqbJWiX2w==
-  dependencies:
-    fast-deep-equal "^3.1.3"
-    fast-querystring "^1.0.0"
-    safe-regex2 "^5.0.0"
-
-find-my-way@^9.0.0:
-  version "9.5.0"
-  resolved "https://registry.yarnpkg.com/find-my-way/-/find-my-way-9.5.0.tgz#3e6819bf4310b5293f490c032e70be0b506d0dc8"
-  integrity sha512-VW2RfnmscZO5KgBY5XVyKREMW5nMZcxDy+buTOsL+zIPnBlbKm+00sgzoQzq1EVh4aALZLfKdwv6atBGcjvjrQ==
+find-my-way@9.6.0, find-my-way@^9.0.0:
+  version "9.6.0"
+  resolved "https://registry.yarnpkg.com/find-my-way/-/find-my-way-9.6.0.tgz#d8e78d98d02ba749c86526edaca780c094073313"
+  integrity sha512-Zf4Xve4RymLl7NgaavNebZ01joJ8MfVerOG43wy7SHLO+r+K0C6d/SE0BiR7AV5V1VOCFlOP7ecdo+I4qmiHrQ==
   dependencies:
     fast-deep-equal "^3.1.3"
     fast-querystring "^1.0.0"
@@ -6372,10 +6363,10 @@ path-to-regexp@3.2.0:
   resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-3.2.0.tgz"
   integrity sha512-jczvQbCUS7XmS7o+y1aEO9OBVFeZBQ1MDSEqmO7xSoPgOPoowY/SxLpZ6Vh97/8qHZOteiCKb7gkG9gA2ZUxJA==
 
-path-to-regexp@8.3.0:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.3.0.tgz#aa818a6981f99321003a08987d3cec9c3474cd1f"
-  integrity sha512-7jdwVIRtsP8MYpdXSwOS0YdD0Du+qOoF/AEPIt88PcCFrZCzx41oxku1jD88hZBwbNUIEfpqvuhjFaMAqMTWnA==
+path-to-regexp@8.4.2:
+  version "8.4.2"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.4.2.tgz#795c420c4f7ca45c5b887366f622ee0c9852cccd"
+  integrity sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA==
 
 path-type@^4.0.0:
   version "4.0.0"
@@ -6414,7 +6405,7 @@ pino-std-serializers@^7.0.0:
   resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-7.1.0.tgz#a7b0cd65225f29e92540e7853bd73b07479893fc"
   integrity sha512-BndPH67/JxGExRgiX1dX0w1FvZck5Wa4aal9198SrRhZjH3GxKQUKIBnYJTdj2HDN3UQAS06HlfcSbQj2OHmaw==
 
-pino@^10.1.0:
+"pino@^9.14.0 || ^10.1.0":
   version "10.3.1"
   resolved "https://registry.yarnpkg.com/pino/-/pino-10.3.1.tgz#6552c8f8d8481844c9e452e7bf0be90bff1939ce"
   integrity sha512-r34yH/GlQpKZbU1BvFFqOjhISRo1MNx1tWYsYvmj6KIRHSPMT2+yHOEb1SG6NMvRoHRF0a07kCOox/9yakl1vg==
